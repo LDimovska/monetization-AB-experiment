@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Paywall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink: #e040fb;
+    --lime: #c6f135;
+    --purple-selected: #7b2d8b;
+    --card-dark: #1e1e1e;
+    --card-border: #333;
+    --bg: #080c0b;
+    --text: #ffffff;
+    --muted: #999999;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #050808;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .phone {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 80% 40% at 20% 10%, rgba(0,80,70,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 30%, rgba(80,0,60,0.25) 0%, transparent 55%),
+      radial-gradient(ellipse 90% 60% at 50% 80%, rgba(0,60,50,0.2) 0%, transparent 70%),
+      radial-gradient(ellipse 100% 100% at 50% 50%, #0d1412 0%, #060909 100%);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Velvet texture overlay */
+  .phone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding-bottom: 28px;
+  }
+
+  /* Close button */
+  .close-btn {
+    position: absolute;
+    top: 18px;
+    left: 20px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    background: none;
+    border: none;
+    color: white;
+    opacity: 0.85;
+  }
+  .close-btn svg { width: 20px; height: 20px; }
+
+  /* Hero carousel */
+  .hero {
+    padding-top: 56px;
+    overflow: hidden;
+    position: relative;
+    touch-action: pan-y;
+  }
+
+  .slides-track {
+    display: flex;
+    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .slide {
+    flex: 0 0 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 24px;
+  }
+
+  /* Icon area */
+  .slide-icon {
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 18px rgba(224, 64, 251, 0.4));
+  }
+  .slide-icon svg { width: 100%; height: 100%; }
+
+  .slide-headline {
+    font-size: 27px;
+    font-weight: 900;
+    color: var(--text);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  .slide-sub {
+    font-size: 15px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.82);
+    text-align: center;
+    line-height: 1.5;
+    max-width: 310px;
+    margin-bottom: 20px;
+  }
+
+  /* Dots */
+  .dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 4px 0 20px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(224, 64, 251, 0.35);
+    transition: background 0.3s, transform 0.3s;
+    cursor: pointer;
+  }
+  .dot.active {
+    background: #ffffff;
+    transform: scale(1.2);
+  }
+
+  /* Pricing section */
+  .pricing {
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .plan-card {
+    position: relative;
+    background: var(--card-dark);
+    border: 2px solid var(--card-border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.22s, border-color 0.22s;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .plan-card.selected {
+    background: var(--purple-selected);
+    border-color: var(--pink);
+  }
+
+  .plan-card .badge {
+    position: absolute;
+    top: -13px;
+    right: 14px;
+    background: var(--lime);
+    color: #000;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 3px 11px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .plan-left .plan-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .plan-left .plan-billing {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .plan-right {
+    text-align: right;
+  }
+  .plan-right .plan-price {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .plan-right .plan-weekly {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* Fine print */
+  .fine-print {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    padding: 12px 28px 0;
+    line-height: 1.5;
+  }
+
+  /* Countdown */
+  .countdown {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.75);
+    padding: 10px 20px 2px;
+    letter-spacing: 0.2px;
+  }
+  .countdown #timer {
+    color: var(--lime);
+    font-weight: 900;
+  }
+
+  /* CTA */
+  .cta-wrap {
+    padding: 14px 20px 8px;
+  }
+  .cta-btn {
+    width: 100%;
+    height: 56px;
+    background: var(--lime);
+    color: #000;
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: opacity 0.18s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cta-btn:active { transform: scale(0.98); opacity: 0.9; }
+
+  /* Footer */
+  .footer {
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 24px 4px;
+  }
+  .footer a {
+    color: var(--pink);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    opacity: 0.9;
+  }
+  .footer a:hover { opacity: 1; }
+
+  @media (min-width: 431px) {
+    body { padding: 20px 0; align-items: center; }
+    .phone { border-radius: 36px; min-height: auto; box-shadow: 0 40px 100px rgba(0,0,0,0.8); }
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="content">
+
+    <!-- Close -->
+    <button class="close-btn" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Hero Carousel -->
+    <div class="hero" id="hero">
+      <div class="slides-track" id="slidesTrack">
+
+        <!-- Slide 1: Trust Signal -->
+        <div class="slide">
+          <div class="slide-icon">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+              <!-- Lime circle bg -->
+              <circle cx="75" cy="75" r="60" fill="#c6f135" opacity="0.95"/>
+              <pattern id="dotsTrust" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+                <circle cx="4" cy="4" r="1.5" fill="#000" opacity="0.12"/>
+              </pattern>
+              <circle cx="75" cy="75" r="60" fill="url(#dotsTrust)"/>
+              <!-- Left person -->
+              <circle cx="42" cy="58" r="13" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+              <path d="M20 98 Q20 76 42 76 Q64 76 64 98" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+              <!-- Right person -->
+              <circle cx="108" cy="58" r="13" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+              <path d="M86 98 Q86 76 108 76 Q130 76 130 98" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+              <!-- Centre person (slightly larger, foreground) -->
+              <circle cx="75" cy="52" r="16" fill="#e040fb" stroke="#000" stroke-width="2"/>
+              <path d="M49 98 Q49 72 75 72 Q101 72 101 98" fill="#e040fb" stroke="#000" stroke-width="2"/>
+            </svg>
+          </div>
+          <h2 class="slide-headline">Join 2M+ users already on the app</h2>
+          <p class="slide-sub">The world's largest community is waiting for you.</p>
+        </div>
+
+        <!-- Slide 2: Make the First Move -->
+        <div class="slide">
+          <div class="slide-icon">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+              <!-- Lime circle bg -->
+              <circle cx="75" cy="75" r="60" fill="#c6f135" opacity="0.95"/>
+              <pattern id="dots2" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+                <circle cx="4" cy="4" r="1.5" fill="#000" opacity="0.15"/>
+              </pattern>
+              <circle cx="75" cy="75" r="60" fill="url(#dots2)"/>
+              <!-- Lightning bolt -->
+              <polygon points="85,25 60,78 78,78 65,125 98,62 78,62" fill="#e040fb" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+              <!-- highlight on bolt -->
+              <polygon points="85,25 74,52 80,52" fill="white" opacity="0.25"/>
+            </svg>
+          </div>
+          <h2 class="slide-headline">Make the First Move</h2>
+          <p class="slide-sub">Send more Likes, Gifts, and First Messages.</p>
+        </div>
+
+        <!-- Slide 2: Unmask Your Fans -->
+        <div class="slide">
+          <div class="slide-icon">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+              <!-- Spiky burst bg -->
+              <polygon points="75,10 82,45 108,22 90,52 128,50 100,68 130,82 98,88 118,112 90,102 92,135 75,112 58,135 60,102 32,112 52,88 20,82 50,68 22,50 60,52 42,22 68,45" fill="#c6f135"/>
+              <!-- Mask -->
+              <path d="M30 72 Q75 45 120 72 L118 85 Q100 75 88 78 Q82 90 75 90 Q68 90 62 78 Q50 75 32 85 Z" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+              <!-- Eye holes -->
+              <ellipse cx="56" cy="74" rx="12" ry="8" fill="#000" opacity="0.7"/>
+              <ellipse cx="94" cy="74" rx="12" ry="8" fill="#000" opacity="0.7"/>
+              <!-- Stars -->
+              <text x="18" y="55" font-size="10" fill="#e040fb">★</text>
+              <text x="120" y="45" font-size="8" fill="#e040fb">★</text>
+              <text x="110" y="115" font-size="7" fill="#e040fb">★</text>
+              <text x="28" y="110" font-size="9" fill="#e040fb">★</text>
+            </svg>
+          </div>
+          <h2 class="slide-headline">Unmask Your Fans</h2>
+          <p class="slide-sub">See Visitors, Likes, and unlock other users' Secret Stats.</p>
+        </div>
+
+        <!-- Slide 3: No Ads, Just Fun -->
+        <div class="slide">
+          <div class="slide-icon">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+              <!-- Spiky burst bg -->
+              <polygon points="75,10 82,38 104,18 100,46 126,34 116,60 144,56 128,76 150,86 128,94 140,116 116,112 120,138 96,126 90,150 75,132 60,150 54,126 30,138 34,112 10,116 22,94 0,86 22,76 6,56 34,60 24,34 50,46 46,18 68,38" fill="#c6f135"/>
+              <!-- Left hand (clapping) -->
+              <g transform="rotate(-20 55 85)">
+                <rect x="38" y="70" width="34" height="42" rx="12" fill="#e040fb" stroke="#000" stroke-width="2"/>
+                <!-- Fingers -->
+                <rect x="42" y="55" width="8" height="22" rx="4" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+                <rect x="52" y="50" width="8" height="26" rx="4" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+                <rect x="62" y="52" width="8" height="24" rx="4" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+                <!-- Thumb -->
+                <rect x="32" y="72" width="10" height="18" rx="5" fill="#e040fb" stroke="#000" stroke-width="1.5" transform="rotate(20 37 81)"/>
+              </g>
+              <!-- Right hand (clapping) -->
+              <g transform="rotate(15 100 80) scale(-1,1) translate(-200,0)">
+                <rect x="38" y="70" width="34" height="42" rx="12" fill="#e040fb" stroke="#000" stroke-width="2"/>
+                <rect x="42" y="55" width="8" height="22" rx="4" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+                <rect x="52" y="50" width="8" height="26" rx="4" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+                <rect x="62" y="52" width="8" height="24" rx="4" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+                <rect x="32" y="72" width="10" height="18" rx="5" fill="#e040fb" stroke="#000" stroke-width="1.5" transform="rotate(20 37 81)"/>
+              </g>
+              <!-- Impact lines -->
+              <line x1="75" y1="55" x2="75" y2="42" stroke="#e040fb" stroke-width="3" stroke-linecap="round"/>
+              <line x1="88" y1="60" x2="96" y2="50" stroke="#e040fb" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="62" y1="60" x2="54" y2="50" stroke="#e040fb" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h2 class="slide-headline">No Ads, Just Fun</h2>
+          <p class="slide-sub">Pure play, pure fun.</p>
+        </div>
+
+        <!-- Slide 4: Sit Back & Relax -->
+        <div class="slide">
+          <div class="slide-icon">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+              <!-- Lime halftone circle bg -->
+              <circle cx="75" cy="75" r="60" fill="#c6f135" opacity="0.9"/>
+              <!-- Halftone dots pattern -->
+              <pattern id="dots1" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+                <circle cx="4" cy="4" r="1.5" fill="#000" opacity="0.15"/>
+              </pattern>
+              <circle cx="75" cy="75" r="60" fill="url(#dots1)"/>
+              <!-- Heart shape -->
+              <path d="M75 105 C75 105 38 82 38 58 C38 44 48 36 58 36 C65 36 71 40 75 45 C79 40 85 36 92 36 C102 36 112 44 112 58 C112 82 75 105 75 105Z" fill="#e040fb"/>
+              <!-- Scratch marks across heart -->
+              <line x1="52" y1="50" x2="70" y2="78" stroke="#000" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+              <line x1="60" y1="47" x2="78" y2="75" stroke="#000" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+              <line x1="68" y1="45" x2="86" y2="73" stroke="#000" stroke-width="2" stroke-linecap="round" opacity="0.35"/>
+              <!-- highlight -->
+              <ellipse cx="62" cy="52" rx="6" ry="4" fill="white" opacity="0.2" transform="rotate(-25 62 52)"/>
+            </svg>
+          </div>
+          <h2 class="slide-headline">Sit Back &amp; Relax</h2>
+          <p class="slide-sub">Let our compatibility quiz do the matching for you.</p>
+        </div>
+
+        <!-- Slide 5: Get X-Ray Specs -->
+        <div class="slide">
+          <div class="slide-icon">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+              <!-- Dotted halo ring -->
+              <circle cx="75" cy="72" r="58" fill="none" stroke="#c6f135" stroke-width="6" stroke-dasharray="6 5"/>
+              <!-- Face circle -->
+              <circle cx="75" cy="75" r="44" fill="#e040fb"/>
+              <!-- Spiral glasses -->
+              <!-- Left lens -->
+              <circle cx="58" cy="76" r="13" fill="white" stroke="#000" stroke-width="2"/>
+              <circle cx="58" cy="76" r="9" fill="none" stroke="#555" stroke-width="1.5"/>
+              <circle cx="58" cy="76" r="5" fill="none" stroke="#555" stroke-width="1.2"/>
+              <circle cx="58" cy="76" r="2" fill="#555"/>
+              <!-- Right lens -->
+              <circle cx="93" cy="76" r="13" fill="white" stroke="#000" stroke-width="2"/>
+              <circle cx="93" cy="76" r="9" fill="none" stroke="#555" stroke-width="1.5"/>
+              <circle cx="93" cy="76" r="5" fill="none" stroke="#555" stroke-width="1.2"/>
+              <circle cx="93" cy="76" r="2" fill="#555"/>
+              <!-- Bridge -->
+              <line x1="71" y1="76" x2="80" y2="76" stroke="#000" stroke-width="2"/>
+              <!-- Arms -->
+              <line x1="45" y1="74" x2="35" y2="72" stroke="#000" stroke-width="2"/>
+              <line x1="106" y1="74" x2="116" y2="72" stroke="#000" stroke-width="2"/>
+              <!-- Mouth / buck teeth -->
+              <path d="M62 96 Q75 104 88 96" stroke="#000" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <rect x="68" y="95" width="8" height="7" rx="1" fill="white" stroke="#000" stroke-width="1"/>
+              <rect x="75" y="95" width="8" height="7" rx="1" fill="white" stroke="#000" stroke-width="1"/>
+              <line x1="75" y1="95" x2="75" y2="102" stroke="#000" stroke-width="1"/>
+              <!-- Ears/side bits -->
+              <ellipse cx="31" cy="75" rx="5" ry="7" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+              <ellipse cx="119" cy="75" rx="5" ry="7" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <h2 class="slide-headline">Get X-Ray Specs</h2>
+          <p class="slide-sub">Sharpen your Filters to find that special someone.</p>
+        </div>
+
+        <!-- Slide 5: Go Undercover -->
+        <div class="slide">
+          <div class="slide-icon">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+              <!-- Sun spiky rays -->
+              <polygon points="75,8 80,38 96,14 96,44 118,28 110,56 138,52 122,74 148,80 126,94 142,108 118,110 122,136 100,126 96,150 75,132 54,150 50,126 28,136 32,110 8,108 24,94 2,80 28,74 12,52 40,56 32,28 54,44 54,14 70,38" fill="#c6f135"/>
+              <!-- Face circle -->
+              <circle cx="75" cy="80" r="42" fill="#e040fb"/>
+              <!-- Eyelashes top -->
+              <line x1="58" y1="66" x2="54" y2="58" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="63" y1="63" x2="61" y2="54" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="69" y1="62" x2="68" y2="53" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="93" y1="66" x2="97" y2="58" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="88" y1="63" x2="90" y2="54" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="82" y1="62" x2="83" y2="53" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Eyes -->
+              <ellipse cx="62" cy="72" rx="9" ry="9" fill="white"/>
+              <ellipse cx="62" cy="72" rx="5" ry="5" fill="#000"/>
+              <ellipse cx="90" cy="72" rx="9" ry="9" fill="white"/>
+              <ellipse cx="90" cy="72" rx="5" ry="5" fill="#000"/>
+              <!-- Smile -->
+              <path d="M60 90 Q75 104 90 90" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <!-- Cheeks -->
+              <ellipse cx="50" cy="84" rx="7" ry="4" fill="#c44" opacity="0.3"/>
+              <ellipse cx="100" cy="84" rx="7" ry="4" fill="#c44" opacity="0.3"/>
+            </svg>
+          </div>
+          <h2 class="slide-headline">Go Undercover</h2>
+          <p class="slide-sub">Stay "off the radar". Take back a Like, DM, or Visit – anytime.</p>
+        </div>
+
+        <!-- Slide 6: Be a Kink-Star -->
+        <div class="slide">
+          <div class="slide-icon">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+              <!-- Lime oval bg -->
+              <ellipse cx="75" cy="85" rx="62" ry="48" fill="#c6f135"/>
+              <pattern id="dots6" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+                <circle cx="4" cy="4" r="1.5" fill="#000" opacity="0.12"/>
+              </pattern>
+              <ellipse cx="75" cy="85" rx="62" ry="48" fill="url(#dots6)"/>
+              <!-- Star shape -->
+              <polygon points="75,15 85,55 125,55 93,78 105,118 75,95 45,118 57,78 25,55 65,55" fill="#e040fb" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+              <!-- Face on star -->
+              <circle cx="65" cy="62" rx="5" ry="5" fill="white" stroke="#000" stroke-width="1.5"/>
+              <circle cx="65" cy="62" rx="2.5" ry="2.5" fill="#000"/>
+              <circle cx="85" cy="62" rx="5" ry="5" fill="white" stroke="#000" stroke-width="1.5"/>
+              <circle cx="85" cy="62" rx="2.5" ry="2.5" fill="#000"/>
+              <!-- Big smile -->
+              <path d="M60 75 Q75 88 90 75" stroke="#000" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <!-- Teeth -->
+              <path d="M62 75 Q75 84 88 75 L86 79 Q75 86 64 79 Z" fill="white"/>
+              <!-- Mini lightning on top right of star -->
+              <polygon points="100,18 93,35 100,35 92,52 106,30 99,30" fill="#e040fb" stroke="#000" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <h2 class="slide-headline">Be a Superstar</h2>
+          <p class="slide-sub">Jump to the top of Inboxes, Search results, and feature extra promoted ads.</p>
+        </div>
+
+        <!-- Slide 7: Leave Your Mark -->
+        <div class="slide">
+          <div class="slide-icon">
+            <svg viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
+              <!-- Spiky burst -->
+              <polygon points="75,12 80,42 100,20 96,50 122,35 112,62 140,58 122,78 148,86 124,96 138,116 112,112 118,138 94,126 88,150 75,128 62,150 56,126 32,138 38,112 12,116 26,96 2,86 28,78 10,58 38,62 28,35 54,50 50,20 70,42" fill="#c6f135"/>
+              <!-- Whip/crop handle -->
+              <rect x="35" y="108" width="36" height="10" rx="5" fill="#e040fb" stroke="#000" stroke-width="1.5" transform="rotate(-40 53 113)"/>
+              <!-- Whip cord - curved line -->
+              <path d="M65 95 Q80 70 95 78 Q112 88 105 60 Q98 40 115 30" stroke="#e040fb" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <path d="M65 95 Q80 70 95 78 Q112 88 105 60 Q98 40 115 30" stroke="#000" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.4"/>
+              <!-- Tip flick -->
+              <path d="M115 30 Q122 24 120 18" stroke="#e040fb" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <!-- Speed lines -->
+              <line x1="88" y1="40" x2="78" y2="32" stroke="#e040fb" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+              <line x1="95" y1="50" x2="82" y2="46" stroke="#e040fb" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+            </svg>
+          </div>
+          <h2 class="slide-headline">Leave Your Mark</h2>
+          <p class="slide-sub">Comment on pics, drop photos &amp; gifs, and track every read.</p>
+        </div>
+
+      </div><!-- /slides-track -->
+    </div><!-- /hero -->
+
+    <!-- Dots -->
+    <div class="dots" id="dots">
+      <div class="dot active" data-index="0"></div>
+      <div class="dot" data-index="1"></div>
+      <div class="dot" data-index="2"></div>
+      <div class="dot" data-index="3"></div>
+      <div class="dot" data-index="4"></div>
+      <div class="dot" data-index="5"></div>
+      <div class="dot" data-index="6"></div>
+      <div class="dot" data-index="7"></div>
+      <div class="dot" data-index="8"></div>
+    </div>
+
+    <!-- Pricing -->
+    <div class="pricing">
+
+      <div class="plan-card selected" data-plan="monthly">
+        <span class="badge">Most Popular</span>
+        <div class="plan-left">
+          <div class="plan-name">Unlimited Messages + No Ads</div>
+          <div class="plan-billing">Billed monthly</div>
+        </div>
+        <div class="plan-right">
+          <div class="plan-price">USD 18.49</div>
+          <div class="plan-weekly">4,62 US$ per week</div>
+        </div>
+      </div>
+
+      <div class="plan-card" data-plan="semiannual">
+        <div class="plan-left">
+          <div class="plan-name">Unlimited Messages + See Fans</div>
+          <div class="plan-billing">Billed semi-annually</div>
+        </div>
+        <div class="plan-right">
+          <div class="plan-price">USD 63.99</div>
+          <div class="plan-weekly">2,67 US$ per week</div>
+        </div>
+      </div>
+
+      <div class="plan-card" data-plan="annual">
+        <span class="badge">Cheapest</span>
+        <div class="plan-left">
+          <div class="plan-name">No Ads + See Fans</div>
+          <div class="plan-billing">Billed annually</div>
+        </div>
+        <div class="plan-right">
+          <div class="plan-price">USD 90.99</div>
+          <div class="plan-weekly">1,75 US$ per week</div>
+        </div>
+      </div>
+
+    </div><!-- /pricing -->
+
+    <div class="countdown">
+      ⏳ Free trial offer ends in <span id="timer">23:47</span>
+    </div>
+
+    <div class="cta-wrap">
+      <button class="cta-btn">Start my free 3 days</button>
+    </div>
+
+    <p class="fine-print">All subscriptions are auto-renewable. Cancel anytime.</p>
+
+    <div class="footer">
+      <a href="#">Terms</a>
+      <a href="#">Privacy</a>
+      <a href="#">Restore</a>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /phone -->
+
+<script>
+  // --- Carousel ---
+  const track = document.getElementById('slidesTrack');
+  const dotsEl = document.querySelectorAll('.dot');
+  const hero = document.getElementById('hero');
+  const TOTAL = 9;
+  let current = 0;
+  let startX = 0, isDragging = false, dragDelta = 0;
+
+  function goTo(idx) {
+    current = Math.max(0, Math.min(TOTAL - 1, idx));
+    track.style.transform = `translateX(-${current * 100}%)`;
+    dotsEl.forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+
+  // Dot clicks
+  dotsEl.forEach(d => d.addEventListener('click', () => goTo(+d.dataset.index)));
+
+  // Touch swipe
+  hero.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+  }, { passive: true });
+
+  hero.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    dragDelta = e.touches[0].clientX - startX;
+  }, { passive: true });
+
+  hero.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (dragDelta < -50) goTo(current + 1);
+    else if (dragDelta > 50) goTo(current - 1);
+    dragDelta = 0;
+  });
+
+  // Mouse drag (desktop)
+  hero.addEventListener('mousedown', e => { startX = e.clientX; isDragging = true; });
+  hero.addEventListener('mousemove', e => { if (isDragging) dragDelta = e.clientX - startX; });
+  hero.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (dragDelta < -50) goTo(current + 1);
+    else if (dragDelta > 50) goTo(current - 1);
+    dragDelta = 0;
+  });
+  hero.addEventListener('mouseleave', () => { isDragging = false; dragDelta = 0; });
+
+  // --- Countdown timer ---
+  let totalSeconds = 23 * 60 + 47;
+  const timerEl = document.getElementById('timer');
+  setInterval(() => {
+    if (totalSeconds <= 0) return;
+    totalSeconds--;
+    const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const s = String(totalSeconds % 60).padStart(2, '0');
+    timerEl.textContent = `${m}:${s}`;
+  }, 1000);
+
+  // --- Plan selection ---
+  document.querySelectorAll('.plan-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+  });
+</script>
+</body>
+</html>
